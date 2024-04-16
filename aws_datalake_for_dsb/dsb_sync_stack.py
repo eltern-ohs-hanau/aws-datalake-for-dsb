@@ -5,7 +5,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class AwsCdkTempStack(Stack):
+class DsbSyncStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -14,6 +14,6 @@ class AwsCdkTempStack(Stack):
 
         # example resource
         # queue = sqs.Queue(
-        #     self, "AwsCdkTempQueue",
+        #     self, "AwsDatalakeForDsbQueue",
         #     visibility_timeout=Duration.seconds(300),
         # )

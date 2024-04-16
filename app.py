@@ -3,11 +3,11 @@ import os
 
 import aws_cdk as cdk
 
-from aws_cdk_temp.aws_cdk_temp_stack import AwsCdkTempStack
+from aws_datalake_for_dsb.dsb_sync_stack import DsbSyncStack
 
 
 app = cdk.App()
-AwsCdkTempStack(app, "AwsCdkTempStack",
+DsbSyncStack(app, "CdkDsbSyncStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
