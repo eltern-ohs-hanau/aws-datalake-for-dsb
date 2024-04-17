@@ -31,7 +31,7 @@ def lambda_handler(event, context):
         key = os.path.join(
             S3_DOWNLOAD_PREFIX,
             now.strftime("%Y%m%d-%H%M%S_plans"),
-            "{}.html".format(item["url"]))
+            "{}.html".format(item["id"]))
         with bytesIO as data:
             s3_client.upload_fileobj(data, S3_BUCKET_NAME, key)
 

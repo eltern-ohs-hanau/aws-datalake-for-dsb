@@ -60,13 +60,7 @@ class DsbSyncStack(Stack):
             tracing=aws_lambda.Tracing.DISABLED,
         )
 
-        self._function.add_to_role_policy(
-            aws_iam.PolicyStatement(
-                effect=aws_iam.Effect.ALLOW,
-                resources=[self._bucket.bucket_arn],
-                actions=["s3:*"]
-            )
-        )
+        self._bucket.grant_read_write(self._function.grant_principal)
 
         self._rule = aws_events.Rule(
             scope=self,
@@ -75,7 +69,7 @@ class DsbSyncStack(Stack):
             enabled=True,
             schedule=aws_events.Schedule.cron(
                 minute='0',
-                hour='0,8',  # Hours are given in UTC time zone
+                hour='0,5,18',  # Hours are given in UTC time zone
                 week_day='MON-FRI',
                 month='*',
                 year='*'),
