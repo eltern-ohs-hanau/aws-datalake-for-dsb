@@ -54,7 +54,6 @@ class DsbSyncStack(Stack):
             index='handler.py',
             log_retention=aws_logs.RetentionDays.ONE_WEEK,
             max_event_age=Duration.hours(1),
-            reserved_concurrent_executions=1,
             retry_attempts=2,
             runtime=aws_lambda.Runtime.PYTHON_3_9,
             timeout=Duration.seconds(900),
@@ -76,7 +75,7 @@ class DsbSyncStack(Stack):
             enabled=True,
             schedule=aws_events.Schedule.cron(
                 minute='0',
-                hour='0,9',
+                hour='0,8',  # Hours are given in UTC time zone
                 week_day='MON-FRI',
                 month='*',
                 year='*'),
