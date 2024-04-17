@@ -1,4 +1,3 @@
-from typing import List
 from aws_cdk import (
     Duration,
     Stack,
@@ -13,6 +12,7 @@ from aws_cdk import (
 
 from constructs import Construct
 
+
 class DsbSyncStack(Stack):
 
     def __init__(self, 
@@ -22,8 +22,7 @@ class DsbSyncStack(Stack):
                  dsb_password: str,
                  default_s3_bucket_prefix: str,
                  default_s3_download_prefix: str,
-                 **kwargs
-    ) -> None:
+                 **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
@@ -70,26 +69,17 @@ class DsbSyncStack(Stack):
             )
         )
 
-        targets: List[aws_events_targets.LambdaFunction] = []
-        targets.append(aws_events_targets.LambdaFunction(self._function))
-        
         self._rule = aws_events.Rule(
             scope=self,
             id="LambdaCron",
-            description=f"CloudWatch event trigger for the Sync Lambda",
+            description="CloudWatch event trigger for the Sync Lambda",
             enabled=True,
             schedule=aws_events.Schedule.cron(
                 minute='0',
-                hour='0,6',
+                hour='0,9',
                 week_day='MON-FRI',
                 month='*',
                 year='*'),
-            targets=targets,
         )
 
-        self._function.add_permission(
-            "1",
-            principal=aws_iam.ServicePrincipal("events.amazonaws.com"),
-            source_arn=self._rule.rule_arn,
-            action="lambda:InvokeFunction",
-        )
+        self._rule.add_target(aws_events_targets.LambdaFunction(self._function))  # type: ignore
