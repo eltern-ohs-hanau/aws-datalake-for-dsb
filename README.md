@@ -95,6 +95,17 @@ Enjoy!
 * **Docker** to build AWS Lambda archive locally with CDK
 * **AWS CDK 2.x** for everything
 
+This CDK stack requires DSB login credentials.
+It needs to be stored in `.cdk.json` file in user home directory as following. 
+```
+{
+  "context": {
+    "dsb:username": "your-dsb-username",
+    "dsb:password": "your-dsb-password"
+  }
+}
+```
+
 ### Local development
 
 This is developed to support development under Mac OS X, Windows and Linux (Ubuntu, CentOS).

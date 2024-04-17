@@ -2,4 +2,3 @@ boto3
 botocore
 aws-lambda-powertools
 pydsb
-pytest==6.2.5

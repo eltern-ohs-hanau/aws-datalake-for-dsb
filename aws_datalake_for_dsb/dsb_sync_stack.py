@@ -1,19 +1,95 @@
+from typing import List
 from aws_cdk import (
-    # Duration,
+    Duration,
     Stack,
-    # aws_sqs as sqs,
+    aws_events,
+    aws_events_targets,
+    aws_iam,
+    aws_lambda,
+    aws_lambda_python_alpha as aws_lambda_python,
+    aws_logs,
+    aws_s3,
 )
+
 from constructs import Construct
 
 class DsbSyncStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, 
+                 scope: Construct,
+                 construct_id: str,
+                 dsb_username: str,
+                 dsb_password: str,
+                 default_s3_bucket_prefix: str,
+                 default_s3_download_prefix: str,
+                 **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
 
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "AwsDatalakeForDsbQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
+        self._bucketname = default_s3_bucket_prefix + self.account
+
+        # Create an S3 bucket
+        self._bucket = aws_s3.Bucket(
+            scope=self,
+            id='Bucket',
+            bucket_name=self._bucketname
+        )
+
+        # Sync lambda function
+        self._function = aws_lambda_python.PythonFunction(
+            scope=self,
+            id='Lambda',
+            entry='./aws_datalake_for_dsb/assets/dsb_sync_lambda',  # Path to function code
+            description='Download files from DSB to S3',
+            environment=dict(
+                DSB_USERNAME=dsb_username,
+                DSB_PASSWORD=dsb_password,
+                S3_BUCKET_NAME=self._bucketname,
+                S3_DOWNLOAD_PREFIX=default_s3_download_prefix,
+                POWERTOOLS_SERVICE_NAME=construct_id,
+                POWERTOOLS_LOG_LEVEL='INFO',
+            ),
+            handler='lambda_handler',
+            index='handler.py',
+            log_retention=aws_logs.RetentionDays.ONE_WEEK,
+            max_event_age=Duration.hours(1),
+            reserved_concurrent_executions=1,
+            retry_attempts=2,
+            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            timeout=Duration.seconds(900),
+            tracing=aws_lambda.Tracing.DISABLED,
+        )
+
+        self._function.add_to_role_policy(
+            aws_iam.PolicyStatement(
+                effect=aws_iam.Effect.ALLOW,
+                resources=[self._bucket.bucket_arn],
+                actions=["s3:*"]
+            )
+        )
+
+        targets: List[aws_events_targets.LambdaFunction] = []
+        targets.append(aws_events_targets.LambdaFunction(self._function))
+        
+        self._rule = aws_events.Rule(
+            scope=self,
+            id="LambdaCron",
+            description=f"CloudWatch event trigger for the Sync Lambda",
+            enabled=True,
+            schedule=aws_events.Schedule.cron(
+                minute='0',
+                hour='0,6',
+                week_day='MON-FRI',
+                month='*',
+                year='*'),
+            targets=targets,
+        )
+
+        self._function.add_permission(
+            "1",
+            principal=aws_iam.ServicePrincipal("events.amazonaws.com"),
+            source_arn=self._rule.rule_arn,
+            action="lambda:InvokeFunction",
+        )
