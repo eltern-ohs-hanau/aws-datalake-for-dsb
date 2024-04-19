@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         response = requests.get(item["url"], params={"authid": dsb.token})
         response.raise_for_status()
 
-        #convert content to bytes, since upload_fileobj requires file like obj
+        # Convert content to bytes, since upload_fileobj requires file like obj
         bytesIO = BytesIO(bytes(response.content))
         key = os.path.join(
             S3_DOWNLOAD_PREFIX,

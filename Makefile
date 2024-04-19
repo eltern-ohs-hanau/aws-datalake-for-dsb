@@ -29,7 +29,7 @@ ${AWS_CDK}:
 install: requirements.txt ${VIRTUAL_ENV} ${AWS_CDK}
 	. ${VIRTUAL_ENV}/bin/activate && pip3 install -r requirements.txt
 
-tests: tests/**/test_*.py
+tests: tests/test_*.py
 	pytest -vv tests
 
 clean:
