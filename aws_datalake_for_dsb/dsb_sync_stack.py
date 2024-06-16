@@ -9,8 +9,8 @@ from aws_cdk import (
     aws_logs,
     aws_s3,
 )
-
 from constructs import Construct
+from aws_solutions_constructs.aws_s3_sns import S3ToSns
 
 
 class DsbSyncStack(Stack):
@@ -76,3 +76,10 @@ class DsbSyncStack(Stack):
         )
 
         self._rule.add_target(aws_events_targets.LambdaFunction(self._function))  # type: ignore
+
+        self._topic = S3ToSns(
+            scope=self,
+            id="BucketToSNS",
+            existing_bucket_obj=self._bucket
+        )
+
