@@ -2,3 +2,5 @@ aws-cdk-lib>=2.68.0, <3.0.0
 aws-cdk.aws-lambda-python-alpha
 constructs>=10.0.5,<11.0.0
 aws-solutions-constructs.aws-s3-sns
+aws-solutions-constructs.aws-sns-sqs
+aws-solutions-constructs.aws-sqs-lambda
