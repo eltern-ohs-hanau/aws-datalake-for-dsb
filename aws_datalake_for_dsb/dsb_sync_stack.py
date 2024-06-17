@@ -80,6 +80,7 @@ class DsbSyncStack(Stack):
         self._topic = S3ToSns(
             scope=self,
             id="BucketToSNS",
-            existing_bucket_obj=self._bucket
+            existing_bucket_obj=self._bucket,
+            enable_encryption_with_customer_managed_key=False
         )
 
