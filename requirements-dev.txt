@@ -2,4 +2,6 @@ boto3
 botocore
 aws-lambda-powertools
 pydsb
+pandas
+lxml
 pytest==6.2.5
