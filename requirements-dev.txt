@@ -4,4 +4,5 @@ aws-lambda-powertools
 pydsb
 pandas
 lxml
+pyquery
 pytest==6.2.5
