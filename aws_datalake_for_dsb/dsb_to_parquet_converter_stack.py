@@ -37,7 +37,7 @@ class DsbToParquetConverterStack(Stack):
         self._function = aws_lambda_python.PythonFunction(
             scope=self,
             id='Lambda',
-            entry='./aws_datalake_for_dsb/assets/dsb_converter_lambda',  # Path to function code
+            entry='./aws_datalake_for_dsb/assets/dsb_to_parquet_converter_lambda',  # Path to function code
             description='Convert files on S3 from DSB html to parquet',
             environment=dict(
                 S3_BUCKET_NAME=s3_bucket.bucket_name,

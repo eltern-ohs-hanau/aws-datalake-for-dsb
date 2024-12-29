@@ -25,7 +25,7 @@ default_s3_download_prefix = app.node.try_get_context("default-s3-download-prefi
 default-s3-parquet-prefix = app.node.try_get_context("default-s3-parquet-prefix")
 default_sns_download_topic = app.node.try_get_context("default-sns-download-topic")
 
-# TODO return props
+#TODO return props
 DsbSyncStack(
     app,
     "aws-datalake-for-dsb-sync",

@@ -1,0 +1,108 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dsb-to-parquet-converter"
+dynamic = ["version", "dependencies"]
+description = 'Code to extract HTML table data from DSB download and store one parquet file'
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "bitbauer", email = "4582513+bitbauer@users.noreply.github.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Documentation = "https://github.com/eltern-ohs-hanau/aws-datalake-for-dsb#readme"
+Issues = "https://github.com/eltern-ohs-hanau/aws-datalake-for-dsb/issues"
+Source = "https://github.com/eltern-ohs-hanau/aws-datalake-for-dsb"
+
+[tool.hatch.version]
+path = "src/__about__.py"
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
+dependencies = [
+  "pytest",
+  "pytest-docker-tools",
+  "portpicker",
+  "coverage[toml]>=6.5",
+  "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src tests}"
+
+[tool.hatch.envs.default.scripts]
+tests = "pytest {args:tests}"
+checks = "mypy --install-types --non-interactive {args:src tests}"
+cov-tests = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "cov-tests",
+  "cov-report",
+]
+
+[tool.hatch.envs.hatch-test]
+default-args = ["tests"]
+extra-args = ["-vv"]
+# Attention, parallel=true enables one worker per CPU core and spin up one extra docker container with keycloak
+parallel = false
+extra-dependencies = [
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.12"]
+version = ["latest"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src",
+]
+
+[tool.coverage.run]
+source_pkgs = ["dsb_to_parquet_converter_lambda", "tests"]
+branch = true
+parallel = false
+omit = [
+  "src/__about__.py",
+]
+
+[tool.coverage.paths]
+dsb_to_parquet_converter_lambda = ["src", "*/dsb_to_parquet_converter_lambda/src"]
+tests = ["tests", "*/dsb_to_parquet_converter_lambda/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
