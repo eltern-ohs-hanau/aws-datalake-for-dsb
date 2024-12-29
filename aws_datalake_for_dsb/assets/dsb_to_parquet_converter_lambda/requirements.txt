@@ -1,0 +1,7 @@
+boto3
+pandas
+lxml
+pyquery
+aws-lambda-powertools
+pydantic
+fastjsonschema
