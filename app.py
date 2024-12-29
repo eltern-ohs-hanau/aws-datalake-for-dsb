@@ -22,27 +22,25 @@ dsb_username = app.node.get_context("dsb:username")
 dsb_password = app.node.get_context("dsb:password")
 default_s3_bucket_prefix = app.node.try_get_context("default-s3-bucket-prefix")
 default_s3_download_prefix = app.node.try_get_context("default-s3-download-prefix")
-default-s3-parquet-prefix = app.node.try_get_context("default-s3-parquet-prefix")
+default_s3_parquet_prefix = app.node.try_get_context("default-s3-parquet-prefix")
 default_sns_download_topic = app.node.try_get_context("default-sns-download-topic")
 
-#TODO return props
-DsbSyncStack(
+stack1 = DsbSyncStack(
     app,
     "aws-datalake-for-dsb-sync",
     dsb_username=dsb_username,
     dsb_password=dsb_password,
     s3_bucket_prefix=default_s3_bucket_prefix,
     s3_download_prefix=default_s3_download_prefix,
-    sns_download_topic=default_sns_download_topic,
+    sns_download_topicname=default_sns_download_topic,
     env=env
 )
 
-
-DsbToParquetConverterStack(
+stack2 = DsbToParquetConverterStack(
     app,
     "aws-datalake-for-dsb-parquet-converter",
-    sns_download_topic=default_sns_download_topic,
-    s3_download_bucket=default_s3_bucket_prefix,
+    sns_download_topic=stack1.topic,
+    s3_download_bucket=stack1.bucket,
     s3_parquet_prefix=default_s3_parquet_prefix,
     env=env
 )
