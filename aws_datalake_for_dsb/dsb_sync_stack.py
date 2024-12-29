@@ -8,6 +8,7 @@ from aws_cdk import (
     aws_lambda_python_alpha as aws_lambda_python,
     aws_logs,
     aws_s3,
+    aws_sns
 )
 from constructs import Construct
 from aws_solutions_constructs.aws_s3_sns import S3ToSns
@@ -20,20 +21,27 @@ class DsbSyncStack(Stack):
                  construct_id: str,
                  dsb_username: str,
                  dsb_password: str,
-                 default_s3_bucket_prefix: str,
-                 default_s3_download_prefix: str,
+                 s3_bucket_prefix: str,
+                 s3_download_prefix: str,
+                 sns_download_topic: str,
                  **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
 
-        self._bucketname = default_s3_bucket_prefix + self.account
+        self._bucketname = s3_bucket_prefix + self.account
 
         # Create an S3 bucket
         self._bucket = aws_s3.Bucket(
             scope=self,
             id='Bucket',
             bucket_name=self._bucketname
+        )
+
+        self._download_topic = aws_sns.Topic(
+            scope=self,
+            id='SNS',
+            topic_name=sns_download_topic
         )
 
         # Sync lambda function
@@ -46,7 +54,8 @@ class DsbSyncStack(Stack):
                 DSB_USERNAME=dsb_username,
                 DSB_PASSWORD=dsb_password,
                 S3_BUCKET_NAME=self._bucketname,
-                S3_DOWNLOAD_PREFIX=default_s3_download_prefix,
+                S3_DOWNLOAD_PREFIX=s3_download_prefix,
+                SNS_NOTIFICATION_TOPIC_ARN=self._download_topic.topic_arn,
                 POWERTOOLS_SERVICE_NAME=construct_id,
                 POWERTOOLS_LOG_LEVEL='INFO',
             ),
@@ -61,6 +70,7 @@ class DsbSyncStack(Stack):
         )
 
         self._bucket.grant_read_write(self._function.grant_principal)
+        self._download_topic.grant_publish(self._function.grant_principal)
 
         self._rule = aws_events.Rule(
             scope=self,
@@ -77,10 +87,9 @@ class DsbSyncStack(Stack):
 
         self._rule.add_target(aws_events_targets.LambdaFunction(self._function))  # type: ignore
 
-        self._topic = S3ToSns(
+        self._bucket_topic = S3ToSns(
             scope=self,
             id="BucketToSNS",
             existing_bucket_obj=self._bucket,
             enable_encryption_with_customer_managed_key=False
         )
-
