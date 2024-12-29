@@ -31,7 +31,7 @@ Source = "https://github.com/eltern-ohs-hanau/aws-datalake-for-dsb"
 path = "src/__about__.py"
 
 [tool.hatch.metadata.hooks.requirements_txt]
-files = ["requirements.txt"]
+files = ["src/requirements.txt"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""
