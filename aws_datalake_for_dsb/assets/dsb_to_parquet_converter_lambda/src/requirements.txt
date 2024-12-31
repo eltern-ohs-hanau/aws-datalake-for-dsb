@@ -1,6 +1,7 @@
 boto3
 pandas
 lxml
+fastparquet
 pyquery
 aws-lambda-powertools
 pydantic
