@@ -36,7 +36,7 @@ def lambda_handler(event, context):
 
     if SNS_NOTIFICATION_TOPIC_ARN:
         sns_client = boto3.client('sns')
-        response = client.publish(
+        response = sns_client.publish(
             TopicArn=SNS_NOTIFICATION_TOPIC_ARN,
             Message='success',
             MessageStructure='json',
