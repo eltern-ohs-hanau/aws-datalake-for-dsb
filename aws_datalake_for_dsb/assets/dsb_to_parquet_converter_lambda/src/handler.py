@@ -31,18 +31,18 @@ except Exception as e:
 
 @tracer.capture_method
 def record_handler(record: SQSRecord):
-    # payload: str = record.json_body  # if json string data, otherwise record.body for str
+    payload: dict = record.json_body  # if json string data, otherwise record.body for str
 
-    if record.body == "success" and record.message_attributes is not None:
-        timestamp = message.message_attributes.get('timestamp').get('StringValue')
-        s3_prefix = message.message_attributes.get('s3_prefix').get('StringValue')
-
+    result = payload.get('result')
+    timestamp = payload.get('timestamp')
+    s3_prefix = payload.get('s3_prefix')
+    if result == "success" and s3_prefix:
         logger.debug("DEBUG: Get message for converting files in {}".format(s3_prefix))
 
         s3_client = boto3.client('s3')
         s3_objectnames = s3_client.list_objects(Bucket=S3_BUCKET_NAME, Prefix=f"{s3_prefix}/*")
 
-        s3_client.download_file(S3_BUCKET_NAME, object_name, os.path.join("/tmp", objectname)) for objectname in s3_objectnames
+        s3_client.download_file(S3_BUCKET_NAME, objectname, os.path.join("/tmp", objectname)) for objectname in s3_objectnames
 
         tmp_folder = os.path.join("/tmp", s3_prefix)
         results = [html_helper.parse_dsb_html_file(os.path.join(path, filename)) for filename in os.listdir(tmp_folder)]

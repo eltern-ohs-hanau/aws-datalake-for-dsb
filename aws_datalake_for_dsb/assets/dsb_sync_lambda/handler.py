@@ -3,6 +3,7 @@
 import os
 import boto3
 import requests
+import json
 from pydsb import PyDSB
 from datetime import datetime, timezone
 from io import BytesIO
@@ -38,19 +39,14 @@ def lambda_handler(event, context):
         sns_client = boto3.client('sns')
         response = sns_client.publish(
             TopicArn=SNS_NOTIFICATION_TOPIC_ARN,
-            Message='success',
-            MessageStructure='json',
-            MessageAttributes={
-                'timestamp': {
-                    'DataType': 'String',
-                    'StringValue': now.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-                },
-                's3_prefix': {
-                    'DataType': 'String',
-                    'StringValue': s3_prefix
-                }
-            }
+            MessageStructure="json",
+            Message=json.dumps({
+                "default": "download",
+                "timestamp": now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "result": "success",
+                "s3_prefix": s3_prefix
+            })
         )
         return response
     else:
-        return 'success'
+        return "success"
