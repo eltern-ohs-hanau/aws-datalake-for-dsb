@@ -1,8 +1,10 @@
 boto3
+botocore
 pandas
 lxml
 fastparquet
 pyquery
 aws-lambda-powertools
+aws-xray-sdk
 pydantic
 fastjsonschema

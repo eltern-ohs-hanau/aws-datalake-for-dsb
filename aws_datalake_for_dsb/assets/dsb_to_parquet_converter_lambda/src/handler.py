@@ -1,8 +1,6 @@
-import sys
-import time
 import json
-from os import environ
-from typing import Any, Dict
+import os
+from sys import exit
 import boto3
 import pandas as pd
 from aws_lambda_powertools import Logger, Tracer
@@ -21,12 +19,12 @@ logger = Logger()
 
 try:
     # Globally scoped variables and resources
-    S3_BUCKET_NAME = environ['S3_BUCKET_NAME']
-    S3_PARQUET_PREFIX = environ['S3_PARQUET_PREFIX']
+    S3_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+    S3_PARQUET_PREFIX = os.environ['S3_PARQUET_PREFIX']
 except Exception as e:
     logger.error("ERROR: Unexpected error: Could not initialize globally scoped variables and resources")
     logger.error(e)
-    sys.exit()
+    exit()
 
 
 @tracer.capture_method
@@ -40,19 +38,26 @@ def record_handler(record: SQSRecord):
         logger.debug("DEBUG: Get message for converting files in {}".format(s3_prefix))
 
         s3_client = boto3.client('s3')
-        s3_objectnames = s3_client.list_objects(Bucket=S3_BUCKET_NAME, Prefix=f"{s3_prefix}/*")
+        response = s3_client.list_objects_v2(Bucket=S3_BUCKET_NAME, Prefix=s3_prefix)
 
-        s3_client.download_file(S3_BUCKET_NAME, objectname, os.path.join("/tmp", objectname)) for objectname in s3_objectnames
+        if 'Contents' not in response:
+            logger.warn("WARN: No downloaded files were found at prefix {}\nResponse={}".format(s3_prefix, response))
+            response['Contents'] = []
 
         tmp_folder = os.path.join("/tmp", s3_prefix)
-        results = [html_helper.parse_dsb_html_file(os.path.join(path, filename)) for filename in os.listdir(tmp_folder)]
+        os.makedirs(tmp_folder, exist_ok=True)
+        for s3_object in response['Contents']:
+            s3_client.download_file(S3_BUCKET_NAME, s3_object['Key'], os.path.join("/tmp", s3_object['Key']))
+
+        results = [html_helper.parse_dsb_html_file(os.path.join(tmp_folder, filename)) for filename in os.listdir(tmp_folder)]
 
         parquet_filename = "{}.gzip".format(os.path.basename(s3_prefix))
         parquet_fullpath = os.path.join(tmp_folder, parquet_filename)
-        pd.concat(results, ignore_index=True, sort=False).to_parquet(parquet_fullpath, compression='gzip')
+        html_helper.write_parqet_file(filename=parquet_fullpath, dataframes=results)
 
         s3_client.upload_file(parquet_fullpath, S3_BUCKET_NAME, f"{S3_PARQUET_PREFIX}/{parquet_filename}")
-        os.remove(filename) for filename in os.listdir(tmp_folder)
+        for filename in os.listdir(tmp_folder):
+            os.remove(os.path.join(tmp_folder, filename))
         os.rmdir(tmp_folder)
         
         logger.info("SUCCESS: Upload parquet file to {}/{}".format(S3_PARQUET_PREFIX, parquet_filename))

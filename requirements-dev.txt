@@ -1,6 +1,7 @@
 boto3
 botocore
 aws-lambda-powertools
+aws-xray-sdk
 pydsb
 pandas
 lxml

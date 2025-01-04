@@ -4,3 +4,4 @@ constructs>=10.0.5,<11.0.0
 aws-solutions-constructs.aws-s3-sns
 aws-solutions-constructs.aws-sns-sqs
 aws-solutions-constructs.aws-sqs-lambda
+pydantic

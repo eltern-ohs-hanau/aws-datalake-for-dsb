@@ -39,9 +39,7 @@ def lambda_handler(event, context):
         sns_client = boto3.client('sns')
         response = sns_client.publish(
             TopicArn=SNS_NOTIFICATION_TOPIC_ARN,
-            MessageStructure="json",
             Message=json.dumps({
-                "default": "download",
                 "timestamp": now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "result": "success",
                 "s3_prefix": s3_prefix
