@@ -17,6 +17,8 @@
   "context": {
     "default-s3-bucket-prefix": "dsb-data-",
     "default-s3-download-prefix": "download",
+    "default-s3-parquet-prefix": "parquet-table",
+    "default-sns-download-topic": "dsb-download",
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": [

@@ -1,5 +1,9 @@
 boto3
 botocore
 aws-lambda-powertools
+aws-xray-sdk
 pydsb
+pandas
+lxml
+pyquery
 pytest==6.2.5
